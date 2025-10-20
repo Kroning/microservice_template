@@ -1,0 +1,108 @@
+version: '3.9'
+
+services:{{if index .Modules "vault"}}
+  vault:
+    image: hashicorp/vault:1.15
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+    command: vault server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200 -dev-no-store-token
+    cap_add:
+      - IPC_LOCK
+    healthcheck:
+      test: ["CMD", "vault", "status", "-address=http://127.0.0.1:8200"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+
+  vault-setup:
+    image: hashicorp/vault:1.15
+    depends_on:
+      vault:
+        condition: service_healthy
+    environment:
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+    volumes:
+      - ./data/vault-creds:/data/vault-creds
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        
+        apk add --no-cache jq
+        
+        echo "Waiting for Vault to be ready..."
+        until vault status >/dev/null 2>&1; do
+          sleep 1
+        done
+        
+        echo "=== Enabling AppRole auth ==="
+        vault auth enable approle || true
+        
+        echo "=== Enabling KV (v2) at secret/ ==="
+        vault secrets disable secret || true
+        vault secrets enable -version=2 -path=microservices/secret kv
+        
+        echo "=== Writing policy ==="
+        cat <<EOF | vault policy write app-policy -
+        path "microservices/secret/*" {
+          capabilities = ["create", "update", "read"]
+        }
+        EOF
+        
+        echo "=== Creating role ==="
+        vault write auth/approle/role/myapp \
+          token_policies="app-policy" \
+          bind_secret_id=true \
+          secret_id_ttl=60m \
+          token_ttl=60m \
+          token_max_ttl=120m
+        
+        echo "=== Writing test secret ==="
+        vault kv put microservices/secret/data/config - <<EOF
+        {
+          "data": {
+            "vault": {
+              "healthy": "yes"
+            }
+          }
+        }
+        EOF
+        
+        echo "=== Dumping role_id and secret_id ==="
+        vault read -format=json auth/approle/role/myapp/role-id | jq -j .data.role_id > /data/vault-creds/role_id
+        vault write -format=json -f auth/approle/role/myapp/secret-id | jq -j .data.secret_id > /data/vault-creds/secret_id
+      
+        echo "=== Verifying ==="
+        vault read auth/approle/role/myapp || echo "Role not found!"
+        vault kv get microservices/secret/data/config || echo "Secret not found!"{{end}}
+        chmod 775 /data/vault-creds
+  microservices:
+    platform: linux/amd64
+    container_name: microservices
+    depends_on: { {{if index .Modules "vault"}}
+      vault:
+        { condition: service_healthy },
+      vault-setup:
+        { condition: service_completed_successfully},{{end}}
+      }
+    environment: { {{if index .Modules "vault"}}
+      VAULT_ADDR: http://vault:8200,
+      VAULT_ENABLE: yes,
+      CONFIG_PATH_APP: microservices,
+      CONFIG_PATH_KEY: config,{{end}}
+      }
+    volumes: [ {{if index .Modules "vault"}}
+        "./data/vault-creds:/data/vault-creds",{{end}}
+      ]
+    stdin_open: true
+    tty: true
+    image: microservices
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
