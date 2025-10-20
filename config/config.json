@@ -1,0 +1,33 @@
+{
+  "app": {
+    "name": "microservice-template",
+    "env": "local",
+    "log_level": "debug"
+  },
+  "server": {
+    "http_port": 8080,
+    "grpc" : {
+      "port": 9091,
+      "auth_tokens": [],
+      "bad_auth_random_sleep_min": "100ms",
+      "bad_auth_random_sleep_max": "1s"
+    },
+    "monitoring_port": 8081,
+    "logging": true
+  },
+  "db": {
+    "master": {
+      "host": "localhost",
+      "port": 3307,
+      "user": "root",
+      "password": "password",
+      "database": "microservice-template",
+      "timeout": "2s"
+    },
+    "metrics": true,
+    "migrations": false
+  }{{if index .Modules "vault"}},
+  "vault": {
+    "healthy": "no"
+  }{{end}}
+}

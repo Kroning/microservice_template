@@ -1,0 +1,19 @@
+# THIS FILE IS FOR INTERNAL USE, DO NOT CHANGE IT!
+modules:
+  main:
+    - build/
+    - cmd/main.go
+    - config/config.json
+    - internal/app/config/config.go
+    - internal/app/config/model.go
+    - internal/app/container/container.go
+    - internal/app/container/init_app.go
+    - internal/app/container/stop_app.go
+    - pkg/logger/logger.go
+    - docker-compose.yaml
+    - docker-compose-full.yaml
+    - Dockerfile
+  vault:
+    - internal/app/config/vault.go
+    - data/vault-creds/role_id
+    - data/vault-creds/secret_id
