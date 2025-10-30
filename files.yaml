@@ -20,12 +20,13 @@ modules:
     - internal/modules/dummy/domain.go
     - internal/modules/dummy/interfaces.go
     - internal/app/container/init_services.go
+    - internal/app/container/run_app.go
   vault:
     - internal/app/config/vault.go
     - data/vault-creds/role_id
     - data/vault-creds/secret_id
   http_chi:
-    - internal/app/container/run_app.go
+    - internal/app/container/run_http.go
     - internal/modules/dummy/transport/http/create.go
     - internal/modules/dummy/transport/http/list.go
     - internal/modules/dummy/transport/http/router.go
