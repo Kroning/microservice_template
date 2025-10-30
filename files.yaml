@@ -1,6 +1,7 @@
 # THIS FILE IS FOR INTERNAL USE, DO NOT CHANGE IT!
 modules:
   main:
+    - .gitignore
     - build/
     - cmd/main.go
     - config/config.json
@@ -13,7 +14,22 @@ modules:
     - docker-compose.yaml
     - docker-compose-full.yaml
     - Dockerfile
+    - internal/modules/dummy/repository
+    - internal/modules/dummy/service/service.go
+    - internal/modules/dummy/service/service_test.go
+    - internal/modules/dummy/domain.go
+    - internal/modules/dummy/interfaces.go
+    - internal/app/container/init_services.go
   vault:
     - internal/app/config/vault.go
     - data/vault-creds/role_id
     - data/vault-creds/secret_id
+  http_chi:
+    - internal/app/container/run_app.go
+    - internal/modules/dummy/transport/http/create.go
+    - internal/modules/dummy/transport/http/list.go
+    - internal/modules/dummy/transport/http/router.go
+    - internal/app/container/init_routers.go
+    - internal/transport/http/routers.go
+    - internal/transport/http/health.go
+    - internal/transport/http/v1/routers.go

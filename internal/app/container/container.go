@@ -3,7 +3,10 @@ package container
 import (
 	"context"
 
+	"github.com/go-chi/chi/v5"
+
 	"{{index .App "git"}}/internal/app/config"
+	"{{index .App "git"}}/internal/modules/dummy"
 )
 
 type Container struct {
@@ -33,16 +36,18 @@ type externalClients struct {
 }
 
 type services struct {
-	// SomeService some.Service
+	DummyService dummy.Service
 }
 
 type routers struct {
-	/*HTTPRouters      []server.RouterHTTP
-	GRPCServices []server.ServiceGRPC
-	GraphqlResolver graphql.ResolverRoot*/
+	ChiHTTPRouters chi.Router
 }
 
-func (di *Container) RunApp() {
-	di.initApp()
-	di.stopApp()
+func (c *Container) RunApp() {
+	c.initApp()
+	c.initServices()
+{{- if index .Modules "http_chi"}}
+	c.initRouters(){{end}}
+	c.appRun()
+	c.stopApp()
 }

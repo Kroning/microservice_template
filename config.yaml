@@ -3,4 +3,4 @@ app:
 modules:
   main: yes
   vault: yes
-  http: no
+  http_chi: yes

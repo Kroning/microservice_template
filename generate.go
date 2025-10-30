@@ -75,7 +75,7 @@ func main() {
 	cmd.Dir = *outputPath
 	err := cmd.Run()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("fatal Run:", err.Error())
 	}
 }
 
