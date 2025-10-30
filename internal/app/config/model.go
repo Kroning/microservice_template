@@ -16,7 +16,7 @@ type App struct {
 	Name     string `mapstructure:"name"`
 	LogLevel string `mapstructure:"log_level"`
 }
-
+{{if index .Modules "http_chi"}}
 type HTTPServer struct {
 	Port                    uint          `mapstructure:"port"`
 	ReadHeaderTimeout       time.Duration `mapstructure:"read_header_timeout"`
@@ -25,7 +25,7 @@ type HTTPServer struct {
 	IdleTimeout             time.Duration `mapstructure:"idle_timeout"`
 	GracefulShutdownTimeout time.Duration `mapstructure:"graceful_shutdown_timeout"`
 }
-
+{{end}}
 type DB struct {
 	Master     DBConfig `mapstructure:"master"`
 	Slave      DBConfig `mapstructure:"slave"`
