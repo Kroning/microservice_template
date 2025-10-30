@@ -52,7 +52,7 @@ func loadFromVault(ctx context.Context) (loaded bool, err error) {
 		return false, errors.Wrap(err, "vaultClient Read with path: "+fullPath)
 	}
 	if data == nil {
-		logger.Warn(ctx, "path not exists", zap.String("path", os.Getenv(pathApp)+"/data/"+os.Getenv(vaultConfigPathKey)))
+		logger.Warn(ctx, "path not exists", zap.String("path", fullPath))
 		return false, nil
 	}
 

@@ -5,10 +5,10 @@ import (
 )
 
 type Config struct {
-	App    App    `mapstructure:"app"`
-	Server Server `mapstructure:"server"`
-	DB     DB     `mapstructure:"db"`{{if index .Modules "vault"}}
-	Vault  Vault  `mapstructure:"vault"`{{end}}
+	App        App        `mapstructure:"app"`{{if index .Modules "http_chi"}}
+	HTTPServer HTTPServer `mapstructure:"http_server"`{{end}}
+	DB         DB         `mapstructure:"db"`{{if index .Modules "vault"}}
+	Vault      Vault      `mapstructure:"vault"`{{end}}
 }
 
 type App struct {
@@ -17,18 +17,13 @@ type App struct {
 	LogLevel string `mapstructure:"log_level"`
 }
 
-type Server struct {
-	HTTPPort       *uint `mapstructure:"http_port"`
-	GRPC           GRPC  `mapstructure:"grpc"`
-	MonitoringPort uint  `mapstructure:"monitoring_port"`
-	Logging        bool  `mapstructure:"logging"`
-}
-
-type GRPC struct {
-	Port                  *uint         `mapstructure:"port"`
-	AuthTokens            []string      `mapstructure:"auth_tokens"`
-	BadAuthRandomSleepMin time.Duration `mapstructure:"bad_auth_random_sleep_min"`
-	BadAuthRandomSleepMax time.Duration `mapstructure:"bad_auth_random_sleep_max"`
+type HTTPServer struct {
+	Port                    uint          `mapstructure:"port"`
+	ReadHeaderTimeout       time.Duration `mapstructure:"read_header_timeout"`
+	ReadTimeout             time.Duration `mapstructure:"read_timeout"`
+	WriteTimeout            time.Duration `mapstructure:"write_timeout"`
+	IdleTimeout             time.Duration `mapstructure:"idle_timeout"`
+	GracefulShutdownTimeout time.Duration `mapstructure:"graceful_shutdown_timeout"`
 }
 
 type DB struct {
@@ -49,7 +44,7 @@ type DBConfig struct {
 }
 {{if index .Modules "vault"}}
 type Vault struct {
-	Healthy string `json:"healthy"`
+	Healthy string `mapstructure:"healthy"`
 }
 {{end}}
 type SecretString string
