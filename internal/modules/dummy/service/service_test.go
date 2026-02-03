@@ -4,19 +4,27 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"{{if index .Modules "postgres"}}
+	"go.uber.org/mock/gomock"{{end}}
 
-	"{{index .App "git"}}/internal/modules/dummy"
+	"{{index .App "git"}}/internal/modules/dummy"{{if index .Modules "postgres"}}
+	"{{index .App "git"}}/internal/modules/dummy/dummymocks"{{end}}
 )
 
 func Test_Create(t *testing.T) {
-	ctx := context.Background()
+	ctx := context.Background(){{if index .Modules "postgres"}}
+	ctrl := gomock.NewController(t)
+	mockRepo := dummymocks.NewMockRepository(ctrl){{end}}
+	service := New({{if index .Modules "postgres"}}
+		mockRepo,{{end}}
+	)
+
 	expected := &dummy.Dummy{
 		ID:   100,
 		Name: "Some name",
 	}
-	service := New()
-
+{{if index .Modules "postgres"}}
+	mockRepo.EXPECT().Create(ctx, expected.Name).Return(expected, nil){{end}}
 	actual, err := service.Create(ctx, expected.Name)
 
 	assert.NoError(t, err)
@@ -24,7 +32,13 @@ func Test_Create(t *testing.T) {
 }
 
 func TestService_List(t *testing.T) {
-	ctx := context.Background()
+	ctx := context.Background(){{if index .Modules "postgres"}}
+	ctrl := gomock.NewController(t)
+	mockRepo := dummymocks.NewMockRepository(ctrl){{end}}
+	service := New({{if index .Modules "postgres"}}
+		mockRepo,{{end}}
+	)
+
 	expected := []dummy.Dummy{
 		{
 			ID:   1,
@@ -35,8 +49,8 @@ func TestService_List(t *testing.T) {
 			Name: "Second Object",
 		},
 	}
-	service := New()
-
+{{if index .Modules "postgres"}}
+	mockRepo.EXPECT().List(ctx, dummy.ListRequest{}).Return(expected, nil){{end}}
 	actual, err := service.List(ctx, dummy.ListRequest{})
 
 	assert.NoError(t, err)

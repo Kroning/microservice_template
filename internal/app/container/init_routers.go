@@ -15,5 +15,7 @@ func (c *Container) initHTTPRouters() {
 
 	v1Router := v1.Router(dummyRouter)
 
-	c.Routers.ChiHTTPRouters = http.RegisterHTTPRoutes(v1Router)
+	c.Routers.ChiHTTPRouters = http.RegisterHTTPRoutes(v1Router, http.RouterOptions{
+		Logging: c.App.Cfg.HTTPServer.Logging,
+	})
 }

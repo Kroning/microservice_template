@@ -10,7 +10,24 @@
     "read_timeout":       "5s",
     "write_timeout":      "10s",
     "idle_timeout":       "30s",
-    "graceful_shutdown_timeout": "2s"
+    "graceful_shutdown_timeout": "2s",
+    "logging": true
+  }{{end}}{{if index .Modules "postgres"}},
+  "db": {
+    "master": {
+      "host": "localhost",
+      "port": 5432,
+      "user": "postgres",
+      "password": "postgres",
+      "database": "microservices",
+      "max_open": 100,
+      "max_idle": 10,
+      "max_lifetime": "1h",
+      "max_idle_time": "1m"
+    },
+    "metrics": true,
+    "migrations": true,
+    "migrations_path": ""
   }{{end}}{{if index .Modules "vault"}},
   "vault": {
     "healthy": "no"

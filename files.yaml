@@ -2,6 +2,7 @@
 modules:
   main:
     - .gitignore
+    - Makefile
     - build/
     - cmd/main.go
     - config/config.json
@@ -11,9 +12,9 @@ modules:
     - internal/app/container/init_app.go
     - internal/app/container/stop_app.go
     - pkg/logger/logger.go
-    - docker-compose.yaml
-    - docker-compose-full.yaml
-    - Dockerfile
+    - build/docker-compose.yaml
+    - build/docker-compose-full.yaml
+    - build/Dockerfile
     - internal/modules/dummy/repository
     - internal/modules/dummy/service/service.go
     - internal/modules/dummy/service/service_test.go
@@ -34,3 +35,19 @@ modules:
     - internal/transport/http/routers.go
     - internal/transport/http/health.go
     - internal/transport/http/v1/routers.go
+    - internal/transport/http/middleware/logging.go
+  postgres:
+    - internal/app/container/init_database.go
+    - internal/app/container/init_repositories.go
+    - internal/modules/dummy/repository/postgres.go
+    - internal/modules/dummy/repository/model.go
+    - migrations/db/files/0001_create_table_dummy.down.sql
+    - migrations/db/files/0001_create_table_dummy.up.sql
+    - pkg/storage/interface.go
+    - pkg/storage/postgresql/metrics.go
+    - pkg/storage/postgresql/storage.go
+
+  liquibase-postgres:
+    - migrations/db/db.changelog-master.xml
+    - migrations/db/liquibase/0001_create_table_dummy.sql
+    - build/liquibase/Dockerfile

@@ -26,7 +26,7 @@ services:{{if index .Modules "vault"}}
       VAULT_ADDR: http://vault:8200
       VAULT_TOKEN: root
     volumes:
-      - ./data/vault-creds:/data/vault-creds
+      - ../data/vault-creds:/data/vault-creds
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
@@ -78,31 +78,73 @@ services:{{if index .Modules "vault"}}
       
         echo "=== Verifying ==="
         vault read auth/approle/role/myapp || echo "Role not found!"
-        vault kv get microservices/secret/data/config || echo "Secret not found!"{{end}}
+        vault kv get microservices/secret/data/config || echo "Secret not found!"
         chmod 775 /data/vault-creds
+{{end}}{{if index .Modules "postgres"}}
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: example_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+{{end}}{{if index .Modules "liquibase-postgres"}}
+  liquibase:
+    image: liquibase/liquibase:latest
+    container_name: liquibase
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../migrations/db:/liquibase/changelog
+    command:
+      - --changelog-file=db.changelog-master.xml
+      - --url=jdbc:postgresql://postgres:5432/example_db
+      - --username=postgres
+      - --password=postgres
+      - --driver=org.postgresql.Driver
+      - update
+{{end}}
   microservices:
     platform: linux/amd64
     container_name: microservices
-    depends_on: { {{if index .Modules "vault"}}
+    depends_on: { {{- if index .Modules "vault"}}
       vault:
         { condition: service_healthy },
       vault-setup:
-        { condition: service_completed_successfully},{{end}}
-      }
-    environment: { {{if index .Modules "vault"}}
+        { condition: service_completed_successfully },{{end}}{{if index .Modules "postgres"}}
+      postgres:
+        { condition: service_healthy },{{end}}{{if index .Modules "liquibase-postgres"}}
+      liquibase:
+        { condition: service_completed_successfully },{{end}}
+    }
+    environment: { {{- if index .Modules "vault"}}
       VAULT_ADDR: http://vault:8200,
       VAULT_ENABLE: yes,
       CONFIG_PATH_APP: microservices,
       CONFIG_PATH_KEY: config,{{end}}
-      }
-    volumes: [ {{if index .Modules "vault"}}
-        "./data/vault-creds:/data/vault-creds",{{end}}
-      ]
+    }
+    volumes: [ {{- if index .Modules "vault"}}
+      - "../data/vault-creds:/data/vault-creds",{{end}}
+    ]
     stdin_open: true
     tty: true
     image: microservices
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: build/Dockerfile
     ports:
       - "8082:8082"
+{{if index .Modules "postgres"}}
+volumes:
+  postgres_data:
+{{end}}

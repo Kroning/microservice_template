@@ -4,3 +4,5 @@ modules:
   main: yes
   vault: yes
   http_chi: yes
+  postgres: yes
+  liquibase-postgres: yes
