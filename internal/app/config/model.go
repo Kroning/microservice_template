@@ -6,8 +6,8 @@ import (
 
 type Config struct {
 	App        App        `mapstructure:"app"`{{if index .Modules "http_chi"}}
-	HTTPServer HTTPServer `mapstructure:"http_server"`{{end}}
-	DB         DB         `mapstructure:"db"`{{if index .Modules "vault"}}
+	HTTPServer HTTPServer `mapstructure:"http_server"`{{end}}{{if index .Modules "postgres"}}
+	DB         DB         `mapstructure:"db"`{{end}}{{if index .Modules "vault"}}
 	Vault      Vault      `mapstructure:"vault"`{{end}}
 }
 
@@ -24,25 +24,29 @@ type HTTPServer struct {
 	WriteTimeout            time.Duration `mapstructure:"write_timeout"`
 	IdleTimeout             time.Duration `mapstructure:"idle_timeout"`
 	GracefulShutdownTimeout time.Duration `mapstructure:"graceful_shutdown_timeout"`
+	Logging                 bool          `mapstructure:"logging"`
 }
-{{end}}
+{{end}}{{if index .Modules "postgres"}}
 type DB struct {
-	Master     DBConfig `mapstructure:"master"`
-	Slave      DBConfig `mapstructure:"slave"`
-	Metrics    bool     `mapstructure:"metrics"`
-	Migrations bool     `mapstructure:"migrations"`
+	Master         DBConfig `mapstructure:"master"`
+	Slave          DBConfig `mapstructure:"slave"`
+	Metrics        bool     `mapstructure:"metrics"`
+	Migrations     bool     `mapstructure:"migrations"`
+	MigrationsPath string   `mapstructure:"migrations_path"`
 }
 
 type DBConfig struct {
-	Host     string        `mapstructure:"host"`
-	Port     string        `mapstructure:"port"`
-	User     string        `mapstructure:"user"`
-	Password SecretString  `mapstructure:"password"`
-	Database string        `mapstructure:"database"`
-	MaxOpen  uint          `mapstructure:"max_open"`
-	Timeout  time.Duration `mapstructure:"timeout"`
+	Host        string        `mapstructure:"host"`
+	Port        string        `mapstructure:"port"`
+	User        string        `mapstructure:"user"`
+	Password    SecretString  `mapstructure:"password"`
+	Database    string        `mapstructure:"database"`
+	MaxOpen     uint          `mapstructure:"max_open"`
+	MaxIdle     uint          `mapstructure:"max_idle"`
+	MaxLifetime time.Duration `mapstructure:"max_lifetime"`
+	MaxIdleTime time.Duration `mapstructure:"max_idle_time"`
 }
-{{if index .Modules "vault"}}
+{{end}}{{if index .Modules "vault"}}
 type Vault struct {
 	Healthy string `mapstructure:"healthy"`
 }

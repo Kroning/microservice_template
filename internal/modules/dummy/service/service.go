@@ -7,19 +7,22 @@ import (
 )
 
 // Service implements dummy.Service interface.
-type Service struct {
-	//repo   dummy.Repository
+type Service struct { {{- if index .Modules "postgres"}}
+	repo dummy.Repository{{end}}
 }
 
 // New creates Service instance.
-func New() *Service {
-	return &Service{
-		//repo:   storage,
+func New({{if index .Modules "postgres"}}
+	repo dummy.Repository,{{end}}
+) *Service {
+	return &Service{ {{- if index .Modules "postgres"}}
+		repo: repo,{{end}}
 	}
 }
 
-// Create dummy in database and notify about its creation.
-func (s *Service) Create(ctx context.Context, name string) (*dummy.Dummy, error) {
+// Create dummy and notify about its creation.
+func (s *Service) Create(ctx context.Context, name string) (*dummy.Dummy, error) { {{- if index .Modules "postgres"}}
+	return s.repo.Create(ctx, name){{else}}
 	var res *dummy.Dummy
 
 	res = &dummy.Dummy{
@@ -27,11 +30,12 @@ func (s *Service) Create(ctx context.Context, name string) (*dummy.Dummy, error)
 		Name: name,
 	}
 
-	return res, nil
+	return res, nil{{end}}
 }
 
-// List dummy objects from storage.
-func (s *Service) List(ctx context.Context, request dummy.ListRequest) ([]dummy.Dummy, error) {
+// List dummy objects.
+func (s *Service) List(ctx context.Context, request dummy.ListRequest) ([]dummy.Dummy, error) { {{- if index .Modules "postgres"}}
+	return s.repo.List(ctx, request){{else}}
 	return []dummy.Dummy{
 		{
 			ID:   1,
@@ -41,5 +45,5 @@ func (s *Service) List(ctx context.Context, request dummy.ListRequest) ([]dummy.
 			ID:   2,
 			Name: "Second Object",
 		},
-	}, nil
+	}, nil{{end}}
 }

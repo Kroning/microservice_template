@@ -6,11 +6,13 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"{{index .App "git"}}/internal/app/config"
-	"{{index .App "git"}}/internal/modules/dummy"
+	"{{index .App "git"}}/internal/modules/dummy"{{if index .Modules "postgres"}}
+	"{{index .App "git"}}/pkg/storage"{{end}}
 )
 
 type Container struct {
-	App             app
+	App             app{{if index .Modules "postgres"}}
+	DB              storage.AbstractDB{{end}}
 	Repositories    repositories
 	InternalClients internalClients
 	ExternalClients externalClients
@@ -23,7 +25,8 @@ type app struct {
 	Cfg *config.Config
 }
 
-type repositories struct {
+type repositories struct { {{- if index .Modules "postgres"}}
+	DummyRepository dummy.Repository{{end}}
 }
 
 // internalClients contains internal clients (this company)
@@ -44,7 +47,9 @@ type routers struct {
 }
 
 func (c *Container) RunApp() {
-	c.initApp()
+	c.initApp(){{if index .Modules "postgres"}}
+	c.initDatabase()
+	c.initRepositories(){{end}}
 	c.initServices()
 {{- if index .Modules "http_chi"}}
 	c.initRouters(){{end}}

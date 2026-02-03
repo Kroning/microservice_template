@@ -40,15 +40,20 @@ func main() {
 
 	filesCfg := loadConfig2[Config](filesToCopyFileName)
 
+	fmt.Println("Parsing modules...")
 	for module := range modulesCfg.Modules {
-		fmt.Println(module, modulesCfg.Modules[module], filesCfg.Modules[module])
+		//fmt.Println(module, modulesCfg.Modules[module], filesCfg.Modules[module])
+		fmt.Printf("\nModule %s: ", module)
 		if !modulesCfg.Modules[module] {
+			fmt.Println("skipped")
 			continue
 		}
+		fmt.Println("generating")
 
 		for _, filename := range filesCfg.Modules[module] {
 			// can't use path.Join because we need trailing slash for directories
 			newPath := *outputPath + "/" + filename
+			fmt.Printf("Generating file %s: ", newPath)
 
 			/* don't need to check existence right now
 			if _, err := os.Stat(newPath); err == nil {
@@ -58,7 +63,7 @@ func main() {
 			}
 			*/
 
-			if err := os.MkdirAll(filepath.Dir(newPath), 0770); err != nil {
+			if err := os.MkdirAll(filepath.Dir(newPath), 0775); err != nil {
 				log.Fatal(err)
 			}
 
@@ -67,16 +72,35 @@ func main() {
 			}
 
 			generateFile(filename, newPath, modulesCfg)
+			fmt.Println("done")
 		}
 	}
+
 	generateFile(gomodPath, *outputPath+"/go.mod", modulesCfg)
 	generateFile(gosumPath, *outputPath+"/go.sum", modulesCfg)
+
+	cmdGet := exec.Command("go", "get", "go.uber.org/mock/mockgen")
+	cmdGet.Dir = *outputPath
+	out, err := cmdGet.CombinedOutput()
+	if err != nil {
+		log.Fatalf("go get failed: %v\nOutput:\n%s", err, out)
+	}
+
+	cmdGen := exec.Command("go", "generate", "./...")
+	cmdGen.Dir = *outputPath
+	out, err = cmdGen.CombinedOutput()
+	if err != nil {
+		log.Fatalf("go generate failed: %v\nOutput:\n%s", err, out)
+	}
+
 	cmd := exec.Command("go", "mod", "tidy")
 	cmd.Dir = *outputPath
-	err := cmd.Run()
+	out, err = cmd.CombinedOutput()
 	if err != nil {
-		log.Fatal("fatal Run:", err.Error())
+		log.Fatalf("go mod tidy failed: %v\nOutput:\n%s", err, out)
 	}
+	fmt.Println(string(out))
+	fmt.Println("Successfully generated.")
 }
 
 func loadConfig(path string) Config {
@@ -108,7 +132,7 @@ func loadConfig2[T any](path string) T {
 func generateFile(templatePath, outputPath string, data interface{}) {
 	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
-		log.Fatal("ParseFiles:", err)
+		log.Fatalf("ParseFiles: error in %s: %s", templatePath, err.Error())
 	}
 
 	file, err := os.Create(outputPath)
@@ -117,7 +141,7 @@ func generateFile(templatePath, outputPath string, data interface{}) {
 	}
 	defer file.Close()
 
-	fmt.Println(data)
+	//fmt.Println(data)
 	if err := tmpl.Execute(file, data); err != nil {
 		log.Fatal(err)
 	}
