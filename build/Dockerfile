@@ -20,6 +20,7 @@ USER 0
 
 COPY --from=builder /app/config config
 COPY --from=builder /app/main /app/bin
+COPY --from=builder /app/migrations migrations
 
 RUN chown -R -f 888:888 /app \
  && chmod +x /app
