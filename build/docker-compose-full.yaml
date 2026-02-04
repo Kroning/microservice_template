@@ -87,7 +87,7 @@ services:{{if index .Modules "vault"}}
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: example_db
+      POSTGRES_DB: microservices
     ports:
       - "5432:5432"
     volumes:
@@ -99,7 +99,7 @@ services:{{if index .Modules "vault"}}
       retries: 5
 {{end}}{{if index .Modules "liquibase-postgres"}}
   liquibase:
-    image: liquibase/liquibase:latest
+    build: liquibase/.
     container_name: liquibase
     depends_on:
       postgres:
@@ -108,10 +108,9 @@ services:{{if index .Modules "vault"}}
       - ../migrations/db:/liquibase/changelog
     command:
       - --changelog-file=db.changelog-master.xml
-      - --url=jdbc:postgresql://postgres:5432/example_db
+      - --url=jdbc:postgresql://postgres:5432/microservices
       - --username=postgres
       - --password=postgres
-      - --driver=org.postgresql.Driver
       - update
 {{end}}
   microservices:
@@ -131,10 +130,15 @@ services:{{if index .Modules "vault"}}
       VAULT_ADDR: http://vault:8200,
       VAULT_ENABLE: yes,
       CONFIG_PATH_APP: microservices,
-      CONFIG_PATH_KEY: config,{{end}}
+      CONFIG_PATH_KEY: config,{{end}}{{if index .Modules "postgres"}}
+      DB_MASTER_HOST: postgres,
+      DB_MASTER_PORT: 5432,
+      DB_MASTER_USER: postgres,
+      DB_MASTER_PASSWORD: postgres,
+      DB_MASTER_DATABASE: microservices,{{end}}
     }
     volumes: [ {{- if index .Modules "vault"}}
-      - "../data/vault-creds:/data/vault-creds",{{end}}
+      "../data/vault-creds:/data/vault-creds",{{end}}
     ]
     stdin_open: true
     tty: true
@@ -143,7 +147,7 @@ services:{{if index .Modules "vault"}}
       context: ..
       dockerfile: build/Dockerfile
     ports:
-      - "8082:8082"
+      - "8080:8080"
 {{if index .Modules "postgres"}}
 volumes:
   postgres_data:
