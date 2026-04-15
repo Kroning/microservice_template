@@ -29,8 +29,9 @@ type Config struct {
 }
 
 type ModulesConfig struct {
-	App     map[string]string `yaml:"app"`
-	Modules map[string]bool   `yaml:"modules"`
+	App     map[string]string   `yaml:"app"`
+	Arrays  map[string][]string `yaml:"arrays"`
+	Modules map[string]bool     `yaml:"modules"`
 }
 
 func main() {
@@ -39,6 +40,15 @@ func main() {
 	modulesCfg := loadConfig2[ModulesConfig](modulesToUseFileName)
 
 	filesCfg := loadConfig2[Config](filesToCopyFileName)
+
+	// Adding an array name to modules if one of its elements is enabled
+	for array := range modulesCfg.Arrays {
+		for _, module := range modulesCfg.Arrays[array] {
+			if modulesCfg.Modules[module] {
+				modulesCfg.Modules[array] = true
+			}
+		}
+	}
 
 	fmt.Println("Parsing modules...")
 	for module := range modulesCfg.Modules {

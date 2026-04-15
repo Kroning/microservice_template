@@ -9,8 +9,8 @@ import ({{if index .Modules "postgres"}}
 func (c *Container) stopApp() {
 	logger.Info(c.App.Ctx, "Stopping app")
 {{if index .Modules "postgres"}}
-	if c.DB != nil {
-		if err := c.DB.Close(); err != nil {
+	if c.App.DB != nil {
+		if err := c.App.DB.Close(); err != nil {
 			logger.Error(c.App.Ctx, "failed to close database connection", zap.Error(err))
 		} else {
 			logger.Info(c.App.Ctx, "database connection closed")

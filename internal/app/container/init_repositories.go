@@ -1,9 +1,17 @@
 package container
 
 import (
-	dummyRepository "github.com/Kroning/example_service/internal/modules/dummy/repository"
+	"{{index .App "git"}}/internal/modules/dummy"
+	dummyRepository "{{index .App "git"}}/internal/modules/dummy/repository"
+	"{{index .App "git"}}/pkg/storage"
 )
 
-func (c *Container) initRepositories() {
-	c.Repositories.DummyRepository = dummyRepository.NewPostgresRepository(c.DB)
+type Repositories struct {
+	DummyRepository dummy.Repository
+}
+
+func NewRepositoryModule(db storage.AbstractDB) *Repositories {
+	return &Repositories{
+		dummyRepository.NewPostgresRepository(db),
+	}
 }

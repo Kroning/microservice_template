@@ -14,7 +14,7 @@ docker run docker.io/library/micro-template
 2. Start/stop only dependencies in container:
 ```
 docker compose -fbuild/docker-compose.yaml up
-docker compose down -v
+docker compose -fbuild/docker-compose.yaml down -v
 ```
 3. Start container with service+dependencies:
 ```
@@ -27,4 +27,13 @@ export VAULT_ADDR=http://127.0.0.1:8200
 export VAULT_ENABLE=yes
 export CONFIG_PATH_APP=microservices
 export CONFIG_PATH_KEY=config
+```
+
+Test everything
+```
+go test -v ./...
+```
+integration tests
+```
+go test -v ./test/...
 ```
