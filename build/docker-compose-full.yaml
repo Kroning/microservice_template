@@ -97,7 +97,7 @@ services:{{if index .Modules "vault"}}
       interval: 5s
       timeout: 5s
       retries: 5
-{{end}}{{if index .Modules "liquibase-postgres"}}
+{{end}}{{if and (index .Modules "liquibase-postgres") (index .Modules "postgres")}}
   liquibase:
     build: liquibase/.
     container_name: liquibase
@@ -122,7 +122,7 @@ services:{{if index .Modules "vault"}}
       vault-setup:
         { condition: service_completed_successfully },{{end}}{{if index .Modules "postgres"}}
       postgres:
-        { condition: service_healthy },{{end}}{{if index .Modules "liquibase-postgres"}}
+        { condition: service_healthy },{{end}}{{if and (index .Modules "liquibase-postgres") (index .Modules "postgres")}}
       liquibase:
         { condition: service_completed_successfully },{{end}}
     }

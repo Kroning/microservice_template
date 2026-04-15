@@ -6,9 +6,9 @@ import (
 
 // initDatabase initializes the database connection and runs migrations if enabled.
 func (c *Container) initDatabase() {
-	cfg := c.App.Cfg.DB
+	cfg := c.Cfg.DB
 
-	c.DB = postgresql.New(c.App.Ctx, postgresql.Config{
+	c.DB = postgresql.New(c.Ctx, postgresql.Config{
 		Master: postgresql.ReplicaConfig{
 			Host:        cfg.Master.Host,
 			Port:        cfg.Master.Port,

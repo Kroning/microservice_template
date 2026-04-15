@@ -9,6 +9,7 @@ modules:
     - internal/app/config/config.go
     - internal/app/config/model.go
     - internal/app/container/container.go
+    - internal/app/container/app.go
     - internal/app/container/init_app.go
     - internal/app/container/stop_app.go
     - pkg/logger/logger.go
@@ -26,16 +27,20 @@ modules:
     - internal/app/config/vault.go
     - data/vault-creds/role_id
     - data/vault-creds/secret_id
+  transport:
+    - internal/app/container/init_routers.go
   http_chi:
     - internal/app/container/run_http.go
     - internal/modules/dummy/transport/http/create.go
     - internal/modules/dummy/transport/http/list.go
     - internal/modules/dummy/transport/http/router.go
-    - internal/app/container/init_routers.go
     - internal/transport/http/routers.go
     - internal/transport/http/health.go
     - internal/transport/http/v1/routers.go
     - internal/transport/http/middleware/logging.go
+    - test/main_test.go
+    - test/health_test.go
+    - test/dummy_test.go
   postgres:
     - internal/app/container/init_database.go
     - internal/app/container/init_repositories.go

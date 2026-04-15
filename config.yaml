@@ -1,5 +1,7 @@
 app:
   git: "github.com/Kroning/example_service"
+arrays:
+  transport: ['http_chi']
 modules:
   main: yes
   vault: yes

@@ -10,10 +10,10 @@ import (
 )
 
 func (c *Container) initApp() {
-	c.App.Ctx = context.Background()
-	c.App.Cfg = config.GetConfig(c.App.Ctx)
+	c.Ctx = context.Background()
+	c.Cfg = config.GetConfig(c.Ctx)
 
-	logger.SetLevel(c.App.Cfg.App.LogLevel)
+	logger.SetLevel(c.Cfg.App.LogLevel)
 
-	logger.Info(c.App.Ctx, "Init app: platform: "+runtime.GOOS+"/"+runtime.GOARCH)
+	logger.Info(c.Ctx, "Init app: platform: "+runtime.GOOS+"/"+runtime.GOARCH)
 }

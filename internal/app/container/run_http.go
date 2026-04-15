@@ -15,7 +15,7 @@ func (c *Container) RunPublicHTTP(g *run.Group) {
 	cfg := c.App.Cfg.HTTPServer
 	publicServer := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.Port),
-		Handler:           c.Routers.ChiHTTPRouters,
+		Handler:           c.App.Transport.ChiRouter,
 		ReadHeaderTimeout: cfg.ReadHeaderTimeout,
 		ReadTimeout:       cfg.ReadTimeout,
 		WriteTimeout:      cfg.WriteTimeout,

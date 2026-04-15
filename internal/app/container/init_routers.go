@@ -1,21 +1,24 @@
 package container
 
 import (
+	"github.com/go-chi/chi/v5"
+
+	"{{index .App "git"}}/internal/app/config"
 	dummy "{{index .App "git"}}/internal/modules/dummy/transport/http"
 	"{{index .App "git"}}/internal/transport/http"
 	"{{index .App "git"}}/internal/transport/http/v1"
 )
 
-func (c *Container) initRouters() {
-	c.initHTTPRouters()
+type Transport struct {
+	ChiRouter chi.Router
 }
 
-func (c *Container) initHTTPRouters() {
-	dummyRouter := dummy.Router(c.Services.DummyService)
-
+func NewTransportModule(services *Services, cfg *config.Config) *Transport {
+	dummyRouter := dummy.Router(services.DummyService)
 	v1Router := v1.Router(dummyRouter)
-
-	c.Routers.ChiHTTPRouters = http.RegisterHTTPRoutes(v1Router, http.RouterOptions{
-		Logging: c.App.Cfg.HTTPServer.Logging,
-	})
+	return &Transport{
+		ChiRouter: http.RegisterHTTPRoutes(v1Router, http.RouterOptions{
+			Logging: cfg.HTTPServer.Logging,
+		}),
+	}
 }
